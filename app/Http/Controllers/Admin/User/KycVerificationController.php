@@ -20,24 +20,19 @@ class KycVerificationController extends Controller
 
         $list = KycVerification::when($request->filled('category') && $request->filled('keyword'), function ($query) use ($request) {
             switch ($request->category) {
-                case 'mid':
-                    $query->whereHas('user', function ($query) use ($request) {
-                        $query->where('users.id', $request->keyword);
-                    });
-                    break;
                 case 'account':
                     $query->whereHas('user', function ($query) use ($request) {
-                        $query->where('users.account', $request->keyword);
+                        $query->where('users.account', 'LIKE', '%' . $request->keyword . '%');
                     });
                     break;
                 case 'name':
                     $query->whereHas('user', function ($query) use ($request) {
-                        $query->where('users.name', $request->keyword);
+                        $query->where('users.name', 'LIKE', '%' . $request->keyword . '%');
                     });
                     break;
-                case 'phone':
-                    $query->whereHas('userProfile', function ($query) use ($request) {
-                        $query->where('user_profiles.phone', $request->keyword);
+                default:
+                    $query->whereHas('user', function ($query) use ($request) {
+                        $query->where('users.id', 'LIKE', '%' . $request->keyword . '%');
                     });
                     break;
             }
