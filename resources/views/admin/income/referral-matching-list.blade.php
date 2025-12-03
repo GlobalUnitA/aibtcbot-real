@@ -6,58 +6,7 @@
             <div class="row">
                 <div class="col-lg-12">
                     @include('admin.income.tabs')
-                    <div class="card">
-                        <div class="card-body">
-                            <form action="{{ route('admin.income.list') }}" method="GET">
-                                @foreach(request()->query() as $key => $value)
-                                    @if($key !== 'start_date' && $key !== 'end_date')
-                                        <input type="hidden" name="{{ $key }}" value="{{ $value }}">
-                                    @endif
-                                @endforeach
-                                <div class="row align-items-center">
-                                    <div class="col-12 col-md-2 mb-2">
-                                        <label for="search" class="sr-only">Status</label>
-                                        <select name="status" id="category" class="form-control" >
-                                            <option value="">{{ __('상태 선택') }}</option>
-                                            <option value="pending" @if(request()->status == 'pending') selected @endif>출금신청</option>
-                                            <option value="completed" @if(request()->status == 'completed') selected @endif>출금완료</option>
-                                            <option value="canceled" @if(request()->status == 'canceled') selected @endif>출금취소</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-12 col-md-2 mb-2">
-                                        <label for="search" class="sr-only">Category</label>
-                                        <select name="category" id="category" class="form-control" >
-                                            <option value="">{{ __('카테고리 선택') }}</option>
-                                            <option value="mid" @if(request()->category == 'mid') selected @endif>MID 조회</option>
-                                            <option value="account" @if(request()->category == 'account') selected @endif>아이디 조회</option>
-                                            <option value="name" @if(request()->category == 'name') selected @endif>이름 조회</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-12 col-md-2 mb-2">
-                                        <label for="search" class="sr-only">Keyword</label>
-                                        <input type="text" name="keyword" id="keyword" class="form-control" value="{{ request()->get('keyword') }}">
-                                    </div>
-                                    <div class="col-12 col-md-2 mb-2">
-                                        <label for="start_date" class="sr-only">Start Date</label>
-                                        <div class="input-group">
-                                            <span class="input-group-text"><i class="bi bi-calendar"></i></span>
-                                            <input type="date" name="start_date" id="start_date" class="form-control" value="{{ request()->get('start_date') }}">
-                                        </div>
-                                    </div>
-                                    <div class="col-12 col-md-2 mb-2">
-                                        <label for="end_date" class="sr-only">End Date</label>
-                                        <div class="input-group">
-                                            <span class="input-group-text"><i class="bi bi-calendar"></i></span>
-                                            <input type="date" name="end_date" id="end_date" class="form-control" value="{{ request()->get('end_date') }}">
-                                        </div>
-                                    </div>
-                                    <div class="col-12 col-md-2 text-center mt-2">
-                                        <button type="submit" class="btn btn-primary">Search</button>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
+                    @include('components.search-form', ['route' => route('admin.income.list', ['type' => 'referral_matching'])])
                     <div class="card">
                         <div class="card-body">
                             <div class="mb-3 d-flex justify-content-end">
@@ -70,11 +19,12 @@
                                         <th scope="col" class="text-center">번호</th>
                                         <th scope="col" class="text-center">UID</th>
                                         <th scope="col" class="text-center">이름</th>
+                                        <th scope="col" class="text-center">등급</th>
                                         <th scope="col" class="text-center">종류</th>
-                                        <th scope="col" class="text-center">신청수량</th>
-                                        <th scope="col" class="text-center">실제수량</th>
+                                        <th scope="col" class="text-center">매칭</th>
                                         <th scope="col" class="text-center">상태</th>
-                                        <th scope="col" class="text-center">수수료 / 세금</th>
+                                        <th scope="col" class="text-center">산하ID</th>
+                                        <th scope="col" class="text-center">산하보너스</th>
                                         <th scope="col" class="text-center">일자</th>
                                     </tr>
                                     </thead>
@@ -85,9 +35,9 @@
                                                 <td scope="col" class="text-center">{{ $list->firstItem() + $key }}</td>
                                                 <td scope="col" class="text-center">{{ $value->member->member_id }}</td>
                                                 <td scope="col" class="text-center">{{ $value->member->user->name }}</td>
+                                                <td scope="col" class="text-center">{{ $value->member->grade->name }}</td>
                                                 <td scope="col" class="text-center">{{ $value->income->coin->name }}</td>
                                                 <td scope="col" class="text-center">{{ $value->amount }}</td>
-                                                <td scope="col" class="text-center">{{ $value->actual_amount }}</td>
                                                 <td scope="col" class="text-center">
                                                     @switch($value->status)
                                                         @case('pending')
@@ -106,7 +56,8 @@
                                                             {{ __('환불') }}
                                                     @endswitch
                                                 </td>
-                                                <td scope="col" class="text-center">{{ $value->fee }} / {{ $value->tax }}</td>
+                                                <td scope="col" class="text-center">{{ $value->referralMatching->referrer_id }}</td>
+                                                <td scope="col" class="text-center">{{ number_format($value->referralMatching->bonus->bonus) }}</td>
                                                 <td scope="col" class="text-center">{{ $value->created_at }}</td>
                                             </tr>
                                         @endforeach
