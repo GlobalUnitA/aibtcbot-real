@@ -6,7 +6,7 @@
             <div class="row">
                 <div class="col-lg-12">
                     @include('admin.income.tabs')
-                    @include('components.search-form', ['route' => route('admin.income.list', ['type' => 'rank_bonus'])])
+                    @include('components.search-form', ['route' => route('admin.income.list', ['type' => 'referral_bonus'])])
                     <div class="card">
                         <div class="card-body">
                             <div class="mb-3 d-flex justify-content-end">
@@ -22,33 +22,48 @@
                                         <th scope="col" class="text-center">등급</th>
                                         <th scope="col" class="text-center">종류</th>
                                         <th scope="col" class="text-center">보너스</th>
-                                        <th scope="col" class="text-center">개인매출</th>
-                                        <th scope="col" class="text-center">그룹매출</th>
-                                        <th scope="col" class="text-center">직추천 수</th>
-                                        <th scope="col" class="text-center">보너스 등급</th>
-                                        <th scope="col" class="text-center">지급일자</th>
+                                        <th scope="col" class="text-center">상태</th>
+                                        <th scope="col" class="text-center">산하ID</th>
+                                        <th scope="col" class="text-center">참여금액</th>
+                                        <th scope="col" class="text-center">일자</th>
                                     </tr>
                                     </thead>
                                     <tbody class="table-group-divider">
-                                    @if($list->isNotEmpty())
+                                    @if ($list->isNotEmpty())
                                         @foreach ($list as $key => $value)
                                             <tr style="cursor:pointer;" onclick="window.location='{{ route('admin.income.view', ['id' => $value->id]) }}';">
                                                 <td scope="col" class="text-center">{{ $list->firstItem() + $key }}</td>
                                                 <td scope="col" class="text-center">{{ $value->member->member_id }}</td>
-                                                <td scope="col" class="text-center">{{ $value->member->user->name }}</td>
+                                                <td scope="col" class="text-center">{{ $value->member->member_name }}</td>
                                                 <td scope="col" class="text-center">{{ $value->member->grade->name }}</td>
                                                 <td scope="col" class="text-center">{{ $value->income->coin->name }}</td>
                                                 <td scope="col" class="text-center">{{ $value->amount }}</td>
-                                                <td scope="col" class="text-center">{{ $value->rankBonus->self_sales }}</td>
-                                                <td scope="col" class="text-center">{{ $value->rankBonus->group_sales }}</td>
-                                                <td scope="col" class="text-center">{{ $value->rankBonus->referral_count }}</td>
-                                                <td scope="col" class="text-center">{{ $value->rankBonus->policy->grade->name }}</td>
+                                                <td scope="col" class="text-center">
+                                                    @switch($value->status)
+                                                        @case('pending')
+                                                            {{ __('신청') }}
+                                                            @break
+                                                        @case('waiting')
+                                                            {{ __('대기') }}
+                                                            @break
+                                                        @case('completed')
+                                                            {{ __('완료') }}
+                                                            @break
+                                                        @case('canceled')
+                                                            {{ __('취소') }}
+                                                            @break
+                                                        @default
+                                                            {{ __('환불') }}
+                                                    @endswitch
+                                                </td>
+                                                <td scope="col" class="text-center">{{ $value->referralBonus->referrer_id }}</td>
+                                                <td scope="col" class="text-center">{{ optional(optional($value->referralBonus)->mining)->entry_amount ?? '-' }}</td>
                                                 <td scope="col" class="text-center">{{ $value->created_at }}</td>
                                             </tr>
                                         @endforeach
                                     @else
                                         <tr>
-                                            <td class="text-center" colspan="11">No Data.</td>
+                                            <td class="text-center" colspan="9">No Data.</td>
                                         </tr>
                                     @endif
                                     </tbody>
