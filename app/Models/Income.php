@@ -24,10 +24,11 @@ class Income extends Model
         'balance' => 'decimal:9',
     ];
 
-     protected $appends = [
+    protected $appends = [
         'encrypted_id',
         'fee_rate',
         'tax_rate',
+        'withdrawable_amount',
     ];
 
     public function member()
@@ -43,6 +44,11 @@ class Income extends Model
     public function transfers()
     {
         return $this->hasMany(IncomeTransfer::class, 'income_id', 'id');
+    }
+
+    public function accumulation()
+    {
+        return $this->hasOne(IncomeAccumulation::class, 'income_id', 'id');
     }
 
     public function getEncryptedIdAttribute()
@@ -65,11 +71,25 @@ class Income extends Model
     {
         $policy = AssetPolicy::first();
 
-        if (!$policy) {
-            return 0;
-        }
+        if (!$policy) return 0;
 
         return $policy->tax_rate;
+    }
+
+    public function getWithdrawableAmountAttribute()
+    {
+        $product = $this->accumulation->product;
+        $accumulation = $this->transfers()->where('type', 'referral_bonus')->sum('amount');
+        $avatar_count = $this->member->avatar_count;
+        $should_created = max(floor($accumulation / $product->avatar_target_amount) - $avatar_count, 0);
+        $deducted = $should_created * $product->avatar_cost;
+
+        $reward_unit = $product->avatar_target_amount - $product->avatar_cost;
+        $step = (int)(($accumulation - 1) / $product->avatar_target_amount) + 1;
+        $threshold = $reward_unit * $step;
+        $available_threshold = min($this->balance, $threshold);
+
+        return $available_threshold - $deducted;
     }
 
     public function getIncomeInfo()

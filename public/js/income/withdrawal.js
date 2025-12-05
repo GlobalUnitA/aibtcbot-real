@@ -6,6 +6,11 @@ $(document).ready(function() {
         $('#stock').html($(this).data('balance'));
         $('#stock-label').removeClass('d-none');
         $('#stock-label').addClass('d-block');
+        /* 출금 제한 해제
+            $('#withdrawable_amount').html($(this).data('withdrawable'));
+            $('#withdrawable-label').removeClass('d-none');
+            $('#withdrawable-label').addClass('d-block');
+        */
     });
 
     $("input[name='amount']").on('input', function () {
@@ -17,6 +22,7 @@ $(document).ready(function() {
 
         const income = $("input[name='income']:checked").val();
         const amount = $("input[name='amount']").val().trim();
+        const withdrawable_amount = parseInt($("#withdrawable_amount").html());
 
         if (!income) {
             alertModal($('#msg_withdrawal_asset').data('label'));
@@ -27,7 +33,12 @@ $(document).ready(function() {
             alertModal($('#msg_withdrawal_amount').data('label'));
             return;
         }
-
+        /* 출금 제한 해제
+            if (amount > withdrawable_amount) {
+                alertModal($('#msg_max_withdrawable_amount').data('label'));
+                return;
+            }
+        */
         const formData = new FormData(this);
         $.ajax({
             url: $(this).attr('action'),
