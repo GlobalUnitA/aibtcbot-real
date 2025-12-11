@@ -22,7 +22,8 @@ class AssetExport implements FromCollection, WithHeadings
         $query = DB::table('asset_transfers')
             ->leftJoin('assets', 'asset_transfers.asset_id', '=', 'assets.id')
             ->leftJoin('coins', 'assets.coin_id', '=', 'coins.id')
-            ->leftJoin('users', 'asset_transfers.user_id', '=', 'users.id')
+            ->leftJoin('members', 'asset_transfers.member_id', '=', 'members.id')
+            ->leftJoin('users', 'members.user_id', '=', 'users.id')
             ->select(
                 'users.id',
                 'users.name as user_name',

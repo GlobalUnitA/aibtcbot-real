@@ -24,11 +24,10 @@ class Income extends Model
         'balance' => 'decimal:9',
     ];
 
-    protected $appends = [
+     protected $appends = [
         'encrypted_id',
         'fee_rate',
         'tax_rate',
-        'withdrawable_amount',
     ];
 
     public function member()
@@ -76,30 +75,35 @@ class Income extends Model
         return $policy->tax_rate;
     }
 
-    public function getWithdrawableAmountAttribute()
+    public function calculateWithdrawableAmount()
     {
         if (!$this->accumulation) return 0;
 
         $product = $this->accumulation->product;
         if (!$product) return 0;
 
-        $accumulation = $this->transfers()->where('type', 'referral_bonus')->sum('amount');
-        $avatar_count = $this->member->avatar_count;
-        $should_created = max(floor($accumulation / $product->avatar_target_amount) - $avatar_count, 0);
-        $deducted = $should_created * $product->avatar_cost;
+        $base = floatval($product->avatar_target_amount - $product->avatar_cost);
+        $accumulated_profit = $this->transfers()
+            ->where('type', 'referral_bonus')
+            ->where('status', 'completed')
+            ->sum('amount');
+        $accumulated_withdrawn = $this->transfers()
+            ->where('type', 'withdrawal')
+            ->where('status', 'completed')
+            ->sum('amount');
 
-        $reward_unit = $product->avatar_target_amount - $product->avatar_cost;
-        $step = (int)(($accumulation - 1) / $product->avatar_target_amount) + 1;
-        $threshold = $reward_unit * $step;
-        $available_threshold = min($this->balance, $threshold);
+        $int_part = intdiv($accumulated_profit, $product->avatar_target_amount);
+        $mod_part = $accumulated_profit % $product->avatar_target_amount;
 
-        return $available_threshold - $deducted;
+        $min_part = min($base, $mod_part);
+        $withdrawable_amount = max(0, ($base * $int_part) + $min_part - $accumulated_withdrawn);
+
+        return min($withdrawable_amount, $this->balance);
     }
+
 
     public function getIncomeInfo()
     {
-        $user_profile = UserProfile::where('user_id', $this->user_id)->first();
-
         $incomeTransfers = IncomeTransfer::where('income_id', $this->id)->get();
 
         $deposits =  $incomeTransfers->where('type', 'deposit')->where('status', 'completed');
@@ -120,6 +124,9 @@ class Income extends Model
         $rank_bonus = $incomeTransfers->where('type', 'rank_bonus')->where('status', 'completed');
         $rank_bonus_total = $rank_bonus->sum('amount');
 
+        $avatar_cost = $incomeTransfers->where('type', 'avatar_cost')->where('status', 'completed');
+        $avatar_cost_total = abs($avatar_cost->sum('amount'));
+
         return [
             'encrypted_id' => $this->encrypted_id,
             'coin_name' => $this->coin->name,
@@ -130,6 +137,7 @@ class Income extends Model
             'rank_bonus' => $rank_bonus_total,
             'deposit_total' => $deposit_total,
             'withdrawal_total' => $withdrawal_total,
+            'avatar_cost_total' => $avatar_cost_total,
         ];
     }
 

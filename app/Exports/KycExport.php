@@ -21,11 +21,12 @@ class KycExport implements FromCollection, WithHeadings
         $query = DB::table('kyc_verifications')
             ->leftJoin('users', 'users.id', '=', 'kyc_verifications.user_id')
             ->leftJoin('user_profiles', 'user_profiles.user_id', '=', 'kyc_verifications.user_id')
+            ->leftJoin('members', 'kyc_verifications.user_id', '=', 'members.user_id')
             ->select(
                 'users.account',
                 'users.id',
                 'users.name',
-                'user_profiles.level',
+                'members.level',
                 'user_profiles.phone',
                 'user_profiles.email',
                 'kyc_verifications.status',

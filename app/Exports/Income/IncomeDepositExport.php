@@ -12,7 +12,8 @@ class IncomeDepositExport extends BaseIncomeExport
         $query = DB::table('income_transfers')
             ->leftJoin('incomes', 'income_transfers.income_id', '=', 'incomes.id')
             ->leftJoin('coins', 'incomes.coin_id', '=', 'coins.id')
-            ->leftJoin('users', 'income_transfers.user_id', '=', 'users.id')
+            ->leftJoin('members', 'incomes.member_id', '=', 'members.id')
+            ->leftJoin('users', 'members.user_id', '=', 'users.id')
             ->leftJoin('user_profiles', 'users.id', '=', 'user_profiles.user_id')
             ->select(
                 'users.id',
