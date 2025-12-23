@@ -15,6 +15,7 @@ use App\Http\Controllers\Auth\OtpController;
 
 use App\Http\Controllers\Profile\ProfileController;
 use App\Http\Controllers\Profile\DashboardController;
+use App\Http\Controllers\Profile\ReferralController;
 use App\Http\Controllers\Profile\KycVerificationController;
 
 use App\Http\Controllers\Asset\AssetController;
@@ -93,6 +94,7 @@ Route::middleware(['auth', 'session.timeout'])->group(function () {
         Route::post('/password/update', [ProfileController::class, 'passwordUpdate'])->name('profile.password.update');
 
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('profile.dashboard');
+        Route::get('/referral/{id}', [ReferralController::class, 'index'])->name('profile.referral');
 
         Route::prefix('kyc')->group(function () {
             Route::get('/', [KycVerificationController::class, 'index'])->name('kyc');
@@ -146,9 +148,9 @@ Route::middleware(['auth', 'session.timeout'])->group(function () {
             });
         });
         Route::prefix('withdrawal')->group(function () {
-            //Route::middleware(['otp'])->group(function () {
+            Route::middleware(['otp'])->group(function () {
                 Route::get('/', [IncomeWithdrawalController::class, 'index'])->name('income.withdrawal');
-            //});
+            });
             Route::post('store', [IncomeWithdrawalController::class, 'store'])->name('income.withdrawal.store');
             Route::get('complete/{id}', [IncomeWithdrawalController::class, 'complete'])->name('income.withdrawal.complete');
             Route::prefix('list')->group(function () {

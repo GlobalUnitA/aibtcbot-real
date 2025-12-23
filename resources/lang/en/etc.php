@@ -26,7 +26,7 @@ return array (
   'driver_license_front_upload' => 'Please upload the front page of your Driver License.',
   'verification_upload' => 'Upload Verification Photo',
   'driver_license_number' => 'Driver License Number',
-  'id' =>
+  'id' => 
   array (
     'passport' => 'Passport',
     'id_card' => 'ID',
