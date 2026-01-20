@@ -56,7 +56,7 @@
                 </div>
                 <div class="d-flex form_line w-100 mb-4">
                     <div class="form-label">{{ __('user.meta_id') }}</div>
-                    <input type="text" name="meta_uid" value="{{ $view->meta_uid }}" class="form-control "  {{ $view->meta_uid ? 'readonly' : '' }} >
+                    <input type="text" name="meta_uid" value="{{ $view->meta_uid }}" class="form-control">
                 </div>
                 <div class="d-flex form_line w-100 mb-4 flex-column">
                     <div class="alert alert-danger mt-0 mb-2" role="alert">
